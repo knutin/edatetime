@@ -1,4 +1,7 @@
+%% @doc: datetime stuff
 -module(edatetime).
+-include_lib("eunit/include/eunit.hrl").
+
 -export([date2ts/1,
          datetime2ts/1,
          ts2date/1,
@@ -8,7 +11,7 @@
          now2ms/1,
          now2ts/0,
          now2ts/1,
-         map_days/3
+         day_start/1, week_start/1, month_start/1
         ]).
 
 date2ts({Y, M, D}) ->
@@ -46,5 +49,42 @@ now2ts({MegaSeconds, Seconds, _}) ->
 
 
 
-map_days(_F, _End, _End)   -> [];
-map_days(F, Start, End) -> [F(Start) | map_days(F, edate:shift(Start, 1, day), End)].
+day_start(Ts) when is_integer(Ts) ->
+    Ts - (Ts rem 86400).
+
+shift(Ts, N, days) ->
+    Ts + (N * 86400).
+
+week_start(Ts) when is_integer(Ts) ->
+    WeekDay = calendar:day_of_the_week(ts2date(Ts)),
+    day_start(shift(Ts, -WeekDay+1, days)).
+
+month_start(Ts) when is_integer(Ts) ->
+    {Y, M, _} = ts2date(Ts),
+    date2ts({Y, M, 1}).
+
+%%
+%% TESTS
+%%
+
+day_start_test() ->
+    ?assertEqual(datetime2ts({{2013, 1, 1}, {0, 0, 0}}),
+                 day_start(datetime2ts({{2013, 1, 1}, {0, 0, 0}}))),
+    ?assertEqual(datetime2ts({{2013, 1, 1}, {0, 0, 0}}),
+                 day_start(datetime2ts({{2013, 1, 1}, {0, 10, 0}}))),
+
+    ?assertEqual(datetime2ts({{2013, 1, 1}, {0, 0, 0}}),
+                 day_start(datetime2ts({{2013, 1, 1}, {23, 59, 59}}))).
+
+week_start_test() ->
+    ?assertEqual({2013, 1, 7}, ts2date(week_start(date2ts({2013, 1, 7})))),
+    ?assertEqual({2013, 1, 7}, ts2date(week_start(date2ts({2013, 1, 8})))),
+    ?assertEqual({2012, 12, 31}, ts2date(week_start(date2ts({2013, 1, 1})))),
+    ?assertEqual({2012, 12, 31}, ts2date(week_start(date2ts({2013, 1, 2})))).
+
+month_start_test() ->
+    ?assertEqual({2013, 1, 1}, ts2date(month_start(date2ts({2013, 1, 1})))),
+    ?assertEqual({2013, 1, 1}, ts2date(month_start(date2ts({2013, 1, 2})))),
+    ?assertEqual({2013, 1, 1}, ts2date(month_start(date2ts({2013, 1, 31})))),
+    ?assertEqual({2013, 2, 1}, ts2date(month_start(date2ts({2013, 2, 28})))).
+    
