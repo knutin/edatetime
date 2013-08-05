@@ -11,6 +11,7 @@
          now2ms/1,
          now2ts/0,
          now2ts/1,
+         map/4,
          day_start/1, week_start/1, month_start/1
         ]).
 
@@ -46,6 +47,15 @@ now2ts() ->
 
 now2ts({MegaSeconds, Seconds, _}) ->
     MegaSeconds * 1000000 + Seconds.
+
+
+map(F, Start, End, days) ->
+    do_map(F, day_start(Start), End, days, []).
+
+do_map(F, End, End, _, Acc) ->
+    lists:reverse([F(End) | Acc]);
+do_map(F, Start, End, days, Acc) ->
+    do_map(F, shift(Start, 1, days), End, days, [F(Start) | Acc]).
 
 
 
@@ -87,4 +97,12 @@ month_start_test() ->
     ?assertEqual({2013, 1, 1}, ts2date(month_start(date2ts({2013, 1, 2})))),
     ?assertEqual({2013, 1, 1}, ts2date(month_start(date2ts({2013, 1, 31})))),
     ?assertEqual({2013, 2, 1}, ts2date(month_start(date2ts({2013, 2, 28})))).
-    
+
+map_days_test() ->
+    ?assertEqual([{2012, 12, 31},
+                  {2013, 1, 1},
+                  {2013, 1, 2}],
+                 map(fun ts2date/1,
+                     date2ts({2012, 12, 31}),
+                     date2ts({2013, 1, 2}),
+                     days)).
