@@ -12,6 +12,7 @@
          now2ts/0,
          now2ts/1,
          map/4,
+         shift/3,
          day_start/1, week_start/1, month_start/1
         ]).
 
