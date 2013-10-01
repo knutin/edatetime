@@ -36,13 +36,13 @@ ts2datetime(Timestamp) ->
 
 
 now2us({MegaSecs,Secs,MicroSecs}) ->
-        (MegaSecs * 1000000 + Secs) * 1000000 + MicroSecs.
+    (MegaSecs * 1000000 + Secs) * 1000000 + MicroSecs.
 
 now2ms() ->
     now2ms(os:timestamp()).
 
 now2ms({MegaSecs,Secs,MicroSecs}) ->
-        (MegaSecs * 1000000 + Secs) * 1000000 + (MicroSecs div 1000).
+    (MegaSecs * 1000000 + Secs) * 1000000 + (MicroSecs div 1000).
 
 now2ts() ->
     now2ts(os:timestamp()).
