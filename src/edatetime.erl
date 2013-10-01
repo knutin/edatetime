@@ -12,6 +12,7 @@
          now2ts/0,
          now2ts/1,
          map/4,
+         foldl/5,
          shift/3,
          day_start/1, week_start/1, month_start/1
         ]).
@@ -35,13 +36,13 @@ ts2datetime(Timestamp) ->
 
 
 now2us({MegaSecs,Secs,MicroSecs}) ->
-	(MegaSecs * 1000000 + Secs) * 1000000 + MicroSecs.
+        (MegaSecs * 1000000 + Secs) * 1000000 + MicroSecs.
 
 now2ms() ->
     now2ms(os:timestamp()).
 
 now2ms({MegaSecs,Secs,MicroSecs}) ->
-	(MegaSecs * 1000000 + Secs) * 1000000 + (MicroSecs div 1000).
+        (MegaSecs * 1000000 + Secs) * 1000000 + (MicroSecs div 1000).
 
 now2ts() ->
     now2ts(os:timestamp()).
@@ -57,6 +58,16 @@ do_map(F, End, End, _, Acc) ->
     lists:reverse([F(End) | Acc]);
 do_map(F, Start, End, days, Acc) ->
     do_map(F, shift(Start, 1, days), End, days, [F(Start) | Acc]).
+
+
+
+foldl(F, Acc0, Start, End, days) ->
+    do_foldl(F, day_start(Start), End, days, Acc0).
+
+do_foldl(F, End, End, _, Acc) ->
+    F(End, Acc);
+do_foldl(F, Start, End, days, Acc) ->
+    do_foldl(F, shift(Start, 1, days), End, days, F(Start, Acc)).
 
 
 
@@ -107,3 +118,22 @@ map_days_test() ->
                      date2ts({2012, 12, 31}),
                      date2ts({2013, 1, 2}),
                      days)).
+
+foldl_sum_days_test() ->
+    ?assertEqual(34,
+                 foldl(fun (Ts, Sum) ->
+                               {_, _, Day} = ts2date(Ts),
+                               Day + Sum
+                       end,
+                       0,
+                       date2ts({2012, 12, 31}),
+                       date2ts({2013, 1, 2}),
+                       days)).
+
+foldl_count_days_test() ->
+    ?assertEqual(367,
+                 foldl(fun (_, Count) -> Count + 1 end,
+                       0,
+                       date2ts({2012, 1, 1}),
+                       date2ts({2013, 1, 1}),
+                       days)).
