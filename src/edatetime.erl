@@ -119,16 +119,16 @@ map_days_test() ->
                      date2ts({2013, 1, 2}),
                      days)).
 
-foldl_sum_days_test() ->
-    ?assertEqual(34,
-                 foldl(fun (Ts, Sum) ->
-                               {_, _, Day} = ts2date(Ts),
-                               Day + Sum
-                       end,
-                       0,
-                       date2ts({2012, 12, 31}),
-                       date2ts({2013, 1, 2}),
-                       days)).
+foldl_days_test() ->
+    ?assertEqual([{2012, 12, 31},
+                  {2013, 1, 1},
+                  {2013, 1, 2}],
+                 lists:reverse(
+                   foldl(fun (Ts, Acc) -> [ts2date(Ts) | Acc] end,
+                         [],
+                         date2ts({2012, 12, 31}),
+                         date2ts({2013, 1, 2}),
+                         days))).
 
 foldl_count_days_test() ->
     ?assertEqual(367,
