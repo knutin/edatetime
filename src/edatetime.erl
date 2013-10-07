@@ -52,7 +52,7 @@ now2ts({MegaSeconds, Seconds, _}) ->
 
 
 map(F, Start, End, days) ->
-    do_map(F, day_start(Start), End, days, []).
+    do_map(F, day_start(Start), day_start(End), days, []).
 
 do_map(F, End, End, _, Acc) ->
     lists:reverse([F(End) | Acc]);
@@ -62,7 +62,7 @@ do_map(F, Start, End, days, Acc) ->
 
 
 foldl(F, Acc0, Start, End, days) ->
-    do_foldl(F, day_start(Start), End, days, Acc0).
+    do_foldl(F, day_start(Start), day_start(End), days, Acc0).
 
 do_foldl(F, End, End, _, Acc) ->
     F(End, Acc);
@@ -115,8 +115,8 @@ map_days_test() ->
                   {2013, 1, 1},
                   {2013, 1, 2}],
                  map(fun ts2date/1,
-                     date2ts({2012, 12, 31}),
-                     date2ts({2013, 1, 2}),
+                     date2ts({2012, 12, 31}) + 1,
+                     date2ts({2013, 1, 2}) + 2,
                      days)).
 
 foldl_days_test() ->
@@ -126,8 +126,8 @@ foldl_days_test() ->
                  lists:reverse(
                    foldl(fun (Ts, Acc) -> [ts2date(Ts) | Acc] end,
                          [],
-                         date2ts({2012, 12, 31}),
-                         date2ts({2013, 1, 2}),
+                         date2ts({2012, 12, 31}) + 1,
+                         date2ts({2013, 1, 2}) + 2,
                          days))).
 
 foldl_count_days_test() ->
