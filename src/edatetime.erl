@@ -17,6 +17,8 @@
          day_start/1, week_start/1, month_start/1
         ]).
 
+-export([tomorrow/1]).
+
 date2ts({Y, M, D}) ->
     calendar:datetime_to_gregorian_seconds({{Y, M, D}, {0, 0, 0}})
         - calendar:datetime_to_gregorian_seconds({{1970, 1, 1}, {0,0,0}}).
@@ -85,6 +87,10 @@ month_start(Ts) when is_integer(Ts) ->
     {Y, M, _} = ts2date(Ts),
     date2ts({Y, M, 1}).
 
+
+tomorrow(Ts) ->
+    shift(Ts, 1, days).
+
 %%
 %% TESTS
 %%
@@ -137,3 +143,7 @@ foldl_count_days_test() ->
                        date2ts({2012, 1, 1}),
                        date2ts({2013, 1, 1}),
                        days)).
+
+tomorrow_test() ->
+    ?assertEqual(datetime2ts({{2013, 1, 2}, {0, 1, 0}}),
+                 tomorrow(datetime2ts({{2013, 1, 1}, {0, 1, 0}}))).
