@@ -76,8 +76,13 @@ do_foldl(F, Start, End, days, Acc) ->
 day_start(Ts) when is_integer(Ts) ->
     Ts - (Ts rem 86400).
 
-shift(Ts, N, days) ->
-    Ts + (N * 86400).
+shift(Ts, N, days)    -> Ts + (N * 86400);
+shift(Ts, N, day)     -> Ts + (N * 86400);
+shift(Ts, N, hours)   -> Ts + (N * 3600);
+shift(Ts, N, hour)    -> Ts + (N * 3600);
+shift(Ts, N, minutes) -> Ts + (N * 60);
+shift(Ts, N, minute)  -> Ts + (N * 60);
+shift(Ts, N, seconds) -> Ts + N.
 
 week_start(Ts) when is_integer(Ts) ->
     WeekDay = calendar:day_of_the_week(ts2date(Ts)),
@@ -97,6 +102,16 @@ yesterday(Ts) ->
 %%
 %% TESTS
 %%
+
+shift_test() ->
+    ?assertEqual(datetime2ts({{2013, 1, 1}, {1, 0, 0}}),
+                 shift(datetime2ts({{2013, 1, 1}, {0, 0, 0}}), 1, hour)),
+
+    ?assertEqual(datetime2ts({{2013, 1, 1}, {0, 10, 0}}),
+                 shift(datetime2ts({{2013, 1, 1}, {0, 0, 0}}), 10, minutes)),
+
+    ?assertEqual(datetime2ts({{2013, 1, 1}, {0, 0, 10}}),
+                 shift(datetime2ts({{2013, 1, 1}, {0, 0, 0}}), 10, seconds)).
 
 day_start_test() ->
     ?assertEqual(datetime2ts({{2013, 1, 1}, {0, 0, 0}}),
