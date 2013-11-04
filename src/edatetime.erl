@@ -17,7 +17,7 @@
          day_start/1, week_start/1, month_start/1
         ]).
 
--export([iso8601/1]).
+-export([iso8601/1, iso8601_basic/1]).
 
 -export([tomorrow/1, yesterday/1]).
 
@@ -112,6 +112,12 @@ iso8601(Ts) ->
       io_lib:format("~4.10.0B-~2.10.0B-~2.10.0BT~2.10.0B:~2.10.0B:~2.10.0BZ",
                     [Year, Month, Day, Hour, Minute, Second])).
 
+iso8601_basic(Ts) ->
+    {{Year, Month, Day}, {Hour, Minute, Second}} = edatetime:ts2datetime(Ts),
+    list_to_binary(
+      io_lib:format("~4.10.0B~2.10.0B~2.10.0BT~2.10.0B~2.10.0B~2.10.0BZ",
+                    [Year, Month, Day, Hour, Minute, Second])).
+
 
 
 %%
@@ -185,4 +191,5 @@ tomorrow_test() ->
 
 iso8601_test() ->
     Ts = edatetime:datetime2ts({{2013, 1, 2}, {10, 11, 12}}),
-    ?assertEqual(<<"2013-01-02T10:11:12Z">>, iso8601(Ts)).
+    ?assertEqual(<<"2013-01-02T10:11:12Z">>, iso8601(Ts)),
+    ?assertEqual(<<"20130102T101112Z">>, iso8601_basic(Ts)).
