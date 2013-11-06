@@ -2,19 +2,13 @@
 -module(edatetime).
 -include_lib("eunit/include/eunit.hrl").
 
--export([date2ts/1,
-         datetime2ts/1,
-         ts2date/1,
-         ts2datetime/1,
-         now2us/1,
-         now2ms/0,
-         now2ms/1,
-         now2ts/0,
-         now2ts/1,
-         map/4,
-         foldl/5,
+-export([date2ts/1, datetime2ts/1,
+         ts2date/1, ts2datetime/1,
+         now2us/1, now2ms/0, now2ms/1, now2ts/0, now2ts/1,
+         map/4, foldl/5,
          shift/3,
-         day_start/1, week_start/1, month_start/1
+         day_start/1, week_start/1, month_start/1,
+         second_diff/2, minute_diff/2, hour_diff/2
         ]).
 
 -export([iso8601/1, iso8601_basic/1]).
@@ -100,6 +94,12 @@ tomorrow(Ts) ->
 
 yesterday(Ts) ->
     shift(Ts, -1, days).
+
+
+second_diff(TsA, TsB) -> float((TsA - TsB)).
+minute_diff(TsA, TsB) -> float((TsA - TsB) / 60).
+hour_diff(TsA, TsB)   -> float((TsA - TsB) / (60 * 60)).
+
 
 
 %%
@@ -193,3 +193,18 @@ iso8601_test() ->
     Ts = edatetime:datetime2ts({{2013, 1, 2}, {10, 11, 12}}),
     ?assertEqual(<<"2013-01-02T10:11:12Z">>, iso8601(Ts)),
     ?assertEqual(<<"20130102T101112Z">>, iso8601_basic(Ts)).
+
+
+diff_test() ->
+    ?assertEqual(10.0, second_diff(datetime2ts({{2013, 1, 1}, {0, 0, 10}}),
+                                   datetime2ts({{2013, 1, 1}, {0, 0, 0}}))),
+    ?assertEqual(-10.0, second_diff(datetime2ts({{2013, 1, 1}, {0, 0, 0}}),
+                                    datetime2ts({{2013, 1, 1}, {0, 0, 10}}))),
+
+    ?assertEqual(10.0, minute_diff(datetime2ts({{2013, 1, 1}, {0, 10, 0}}),
+                                   datetime2ts({{2013, 1, 1}, {0, 0, 0}}))),
+    ?assertEqual(10.5, minute_diff(datetime2ts({{2013, 1, 1}, {0, 10, 30}}),
+                                   datetime2ts({{2013, 1, 1}, {0, 0, 0}}))),
+
+    ?assertEqual(1.0, hour_diff(datetime2ts({{2013, 1, 1}, {2, 0, 0}}),
+                                datetime2ts({{2013, 1, 1}, {1, 0, 0}}))).
