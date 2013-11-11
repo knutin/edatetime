@@ -5,6 +5,7 @@
 -export([date2ts/1, datetime2ts/1,
          ts2date/1, ts2datetime/1,
          now2us/1, now2ms/0, now2ms/1, now2ts/0, now2ts/1,
+         range/3,
          map/4, foldl/5,
          shift/3,
          day_start/1, week_start/1, month_start/1,
@@ -48,6 +49,8 @@ now2ts() ->
 now2ts({MegaSeconds, Seconds, _}) ->
     MegaSeconds * 1000000 + Seconds.
 
+range(Start, End, days) ->
+    map(fun (E) -> E end, Start, End, days).
 
 map(F, Start, End, days) ->
     do_map(F, day_start(Start), day_start(End), days, []).
@@ -164,6 +167,13 @@ map_days_test() ->
                      date2ts({2013, 1, 2}) + 2,
                      days)).
 
+range_test() ->
+    ?assertEqual([date2ts({2012, 12, 31}),
+                  date2ts({2013, 1, 1}),
+                  date2ts({2013, 1, 2})],
+                 range(date2ts({2012, 12, 31}), date2ts({2013, 1, 2}), days)).
+
+
 foldl_days_test() ->
     ?assertEqual([{2012, 12, 31},
                   {2013, 1, 1},
@@ -190,7 +200,7 @@ tomorrow_test() ->
                  yesterday(datetime2ts({{2013, 1, 1}, {0, 1, 0}}))).
 
 iso8601_test() ->
-    Ts = edatetime:datetime2ts({{2013, 1, 2}, {10, 11, 12}}),
+    Ts = datetime2ts({{2013, 1, 2}, {10, 11, 12}}),
     ?assertEqual(<<"2013-01-02T10:11:12Z">>, iso8601(Ts)),
     ?assertEqual(<<"20130102T101112Z">>, iso8601_basic(Ts)).
 
