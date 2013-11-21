@@ -52,23 +52,27 @@ now2ts({MegaSeconds, Seconds, _}) ->
 range(Start, End, days) ->
     map(fun (E) -> E end, Start, End, days).
 
+map(F, Start, End, hours) ->
+    do_map(F, Start, End, hours, []);
 map(F, Start, End, days) ->
     do_map(F, day_start(Start), day_start(End), days, []).
 
-do_map(F, End, End, _, Acc) ->
+do_map(F, End, End, _Period, Acc) ->
     lists:reverse([F(End) | Acc]);
-do_map(F, Start, End, days, Acc) ->
-    do_map(F, shift(Start, 1, days), End, days, [F(Start) | Acc]).
+do_map(F, Start, End, Period, Acc) ->
+    do_map(F, shift(Start, 1, Period), End, Period, [F(Start) | Acc]).
 
 
 
+foldl(F, Acc0, Start, End, hours) ->
+    do_foldl(F, Start, End, hours, Acc0);
 foldl(F, Acc0, Start, End, days) ->
     do_foldl(F, day_start(Start), day_start(End), days, Acc0).
 
-do_foldl(F, End, End, _, Acc) ->
+do_foldl(F, End, End, _Period, Acc) ->
     F(End, Acc);
-do_foldl(F, Start, End, days, Acc) ->
-    do_foldl(F, shift(Start, 1, days), End, days, F(Start, Acc)).
+do_foldl(F, Start, End, Period, Acc) ->
+    do_foldl(F, shift(Start, 1, Period), End, Period, F(Start, Acc)).
 
 
 
@@ -166,6 +170,16 @@ map_days_test() ->
                      date2ts({2012, 12, 31}) + 1,
                      date2ts({2013, 1, 2}) + 2,
                      days)).
+
+map_hours_test() ->
+    ?assertEqual([{{2012, 12, 31}, {0, 0, 0}},
+                  {{2012, 12, 31}, {1, 0, 0}},
+                  {{2012, 12, 31}, {2, 0, 0}}
+                 ],
+                 map(fun ts2datetime/1,
+                     datetime2ts({{2012, 12, 31}, {0, 0, 0}}),
+                     datetime2ts({{2012, 12, 31}, {2, 0, 0}}),
+                     hours)).
 
 range_test() ->
     ?assertEqual([date2ts({2012, 12, 31}),
