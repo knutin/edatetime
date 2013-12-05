@@ -52,10 +52,14 @@ now2ts({MegaSeconds, Seconds, _}) ->
 range(Start, End, days) ->
     map(fun (E) -> E end, Start, End, days).
 
-map(F, Start, End, hours) ->
-    do_map(F, Start, End, hours, []);
-map(F, Start, End, days) ->
-    do_map(F, day_start(Start), day_start(End), days, []).
+
+map(F, Start, End, hours) when Start =< End ->
+    do_map(F, hour_start(Start), hour_start(End), hours, []);
+map(F, Start, End, days) when Start =< End ->
+    do_map(F, day_start(Start), day_start(End), days, []);
+map(_, _, _, _) ->
+    error(badarg).
+
 
 do_map(F, End, End, _Period, Acc) ->
     lists:reverse([F(End) | Acc]);
@@ -78,6 +82,9 @@ do_foldl(F, Start, End, Period, Acc) ->
 
 day_start(Ts) when is_integer(Ts) ->
     Ts - (Ts rem 86400).
+
+hour_start(Ts) ->
+    Ts - (Ts rem 3600).
 
 shift(Ts, N, days)    -> Ts + (N * 86400);
 shift(Ts, N, day)     -> Ts + (N * 86400);
@@ -133,6 +140,9 @@ iso8601_basic(Ts) ->
 
 shift_test() ->
     ?assertEqual(datetime2ts({{2013, 1, 1}, {1, 0, 0}}),
+                 shift(datetime2ts({{2013, 1, 1}, {1, 0, 0}}), 0, days)),
+
+    ?assertEqual(datetime2ts({{2013, 1, 1}, {1, 0, 0}}),
                  shift(datetime2ts({{2013, 1, 1}, {0, 0, 0}}), 1, hour)),
 
     ?assertEqual(datetime2ts({{2013, 1, 1}, {0, 10, 0}}),
@@ -169,7 +179,17 @@ map_days_test() ->
                  map(fun ts2date/1,
                      date2ts({2012, 12, 31}) + 1,
                      date2ts({2013, 1, 2}) + 2,
-                     days)).
+                     days)),
+
+    ?assertEqual([{2013, 1, 1}], map(fun ts2date/1,
+                                     datetime2ts({{2013, 1, 1}, {0, 0, 0}}),
+                                     datetime2ts({{2013, 1, 1}, {0, 0, 1}}),
+                                     days)),
+
+    ?assertError(badarg, map(fun ts2date/1,
+                             datetime2ts({{2013, 1, 1}, {0, 0, 0}}),
+                             datetime2ts({{2012, 12, 31}, {0, 0, 0}}),
+                             days)).
 
 map_hours_test() ->
     ?assertEqual([{{2012, 12, 31}, {0, 0, 0}},
@@ -178,7 +198,7 @@ map_hours_test() ->
                  ],
                  map(fun ts2datetime/1,
                      datetime2ts({{2012, 12, 31}, {0, 0, 0}}),
-                     datetime2ts({{2012, 12, 31}, {2, 0, 0}}),
+                     datetime2ts({{2012, 12, 31}, {2, 5, 0}}),
                      hours)).
 
 range_test() ->
