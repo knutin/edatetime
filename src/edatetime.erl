@@ -49,8 +49,8 @@ now2ts() ->
 now2ts({MegaSeconds, Seconds, _}) ->
     MegaSeconds * 1000000 + Seconds.
 
-range(Start, End, days) ->
-    map(fun (E) -> E end, Start, End, days).
+range(Start, End, Interval) ->
+    map(fun (E) -> E end, Start, End, Interval).
 
 
 map(F, Start, End, hours) when Start =< End ->
@@ -205,7 +205,12 @@ range_test() ->
     ?assertEqual([date2ts({2012, 12, 31}),
                   date2ts({2013, 1, 1}),
                   date2ts({2013, 1, 2})],
-                 range(date2ts({2012, 12, 31}), date2ts({2013, 1, 2}), days)).
+                 range(date2ts({2012, 12, 31}), date2ts({2013, 1, 2}), days)),
+    ?assertEqual([datetime2ts({{2012, 12, 31}, {23, 0 ,0}}),
+                  datetime2ts({{2013, 1, 1}, {0, 0, 0}}),
+                  datetime2ts({{2013, 1, 1}, {1, 0, 0}})],
+                 range(datetime2ts({{2012, 12, 31}, {23, 0, 0}}),
+                       datetime2ts({{2013, 1, 1}, {1, 0, 0}}), hours)).
 
 
 foldl_days_test() ->
