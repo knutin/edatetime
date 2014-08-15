@@ -53,10 +53,14 @@ range(Start, End, Interval) ->
     map(fun (E) -> E end, Start, End, Interval).
 
 
-map(F, Start, End, hours) when Start =< End ->
-    do_map(F, hour_start(Start), hour_start(End), hours, []);
-map(F, Start, End, days) when Start =< End ->
-    do_map(F, day_start(Start), day_start(End), days, []);
+map(F, Start, End, Period) when Start =< End ->
+    Align = case Period of
+                 days -> fun day_start/1;
+                 hours -> fun hour_start/1;
+                 minutes -> fun minute_start/1
+            end,
+
+    do_map(F, Align(Start), Align(End), Period, []);
 map(_, _, _, _) ->
     error(badarg).
 
@@ -80,11 +84,10 @@ do_foldl(F, Start, End, Period, Acc) ->
 
 
 
-day_start(Ts) when is_integer(Ts) ->
-    Ts - (Ts rem 86400).
-
-hour_start(Ts) ->
-    Ts - (Ts rem 3600).
+day_start(Ts)    -> Ts - (Ts rem 86400).
+hour_start(Ts)   -> Ts - (Ts rem 3600).
+minute_start(Ts) -> Ts - (Ts rem 60).
+second_start(Ts) -> Ts.
 
 shift(Ts, N, days)    -> Ts + (N * 86400);
 shift(Ts, N, day)     -> Ts + (N * 86400);
@@ -199,6 +202,11 @@ map_hours_test() ->
                  map(fun ts2datetime/1,
                      datetime2ts({{2012, 12, 31}, {0, 0, 0}}),
                      datetime2ts({{2012, 12, 31}, {2, 5, 0}}),
+                     hours)),
+    ?assertEqual([{{2012, 12, 31}, {0, 0, 0}}],
+                 map(fun ts2datetime/1,
+                     datetime2ts({{2012, 12, 31}, {0, 0, 0}}),
+                     datetime2ts({{2012, 12, 31}, {0, 0, 0}}),
                      hours)).
 
 range_test() ->
