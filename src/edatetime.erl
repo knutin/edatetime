@@ -1,4 +1,7 @@
 %% @doc: datetime stuff
+%%    Now = lists:foldl(fun ({T, P}, Ts) -> edatetime:shift(Ts, T, P) end,
+%%                      MinT, [{2, hours}, {17, minutes}, {5, seconds}]),
+
 -module(edatetime).
 -include_lib("eunit/include/eunit.hrl").
 
@@ -57,7 +60,8 @@ map(F, Start, End, Period) when Start =< End ->
     Align = case Period of
                  days -> fun day_start/1;
                  hours -> fun hour_start/1;
-                 minutes -> fun minute_start/1
+                 minutes -> fun minute_start/1;
+                 seconds -> fun (X) -> X end
             end,
 
     do_map(F, Align(Start), Align(End), Period, []);
@@ -87,7 +91,7 @@ do_foldl(F, Start, End, Period, Acc) ->
 day_start(Ts)    -> Ts - (Ts rem 86400).
 hour_start(Ts)   -> Ts - (Ts rem 3600).
 minute_start(Ts) -> Ts - (Ts rem 60).
-second_start(Ts) -> Ts.
+
 
 shift(Ts, N, days)    -> Ts + (N * 86400);
 shift(Ts, N, day)     -> Ts + (N * 86400);
