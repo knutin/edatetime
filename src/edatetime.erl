@@ -3,7 +3,10 @@
 %%                      MinT, [{2, hours}, {17, minutes}, {5, seconds}]),
 
 -module(edatetime).
+
+-ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
+-endif.
 
 -export([date2ts/1, datetime2ts/1,
          ts2date/1, ts2datetime/1,
@@ -145,6 +148,8 @@ iso8601_basic(Ts) ->
 %% TESTS
 %%
 
+-ifdef(TEST).
+
 shift_test() ->
     ?assertEqual(datetime2ts({{2013, 1, 1}, {1, 0, 0}}),
                  shift(datetime2ts({{2013, 1, 1}, {1, 0, 0}}), 0, days)),
@@ -269,3 +274,5 @@ diff_test() ->
 
     ?assertEqual(1.0, hour_diff(datetime2ts({{2013, 1, 1}, {2, 0, 0}}),
                                 datetime2ts({{2013, 1, 1}, {1, 0, 0}}))).
+
+-endif.
