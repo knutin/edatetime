@@ -1,7 +1,4 @@
 %% @doc: datetime stuff
-%%    Now = lists:foldl(fun ({T, P}, Ts) -> edatetime:shift(Ts, T, P) end,
-%%                      MinT, [{2, hours}, {17, minutes}, {5, seconds}]),
-
 -module(edatetime).
 
 -ifdef(TEST).
@@ -19,21 +16,35 @@
         ]).
 
 -export([iso8601/1, iso8601_basic/1]).
-
 -export([tomorrow/1, yesterday/1]).
 
+-type timestamp() :: pos_integer().
+-type year()      :: pos_integer().
+-type month()     :: pos_integer().
+-type day()       :: pos_integer().
+-type hour()      :: pos_integer().
+-type minute()    :: pos_integer().
+-type second()    :: pos_integer().
+-type datetime()  :: {{year(), month(), day()}, {hour(), minute(), second()}}.
+-type date()      :: {year(), month(), day()}.
+-export_type([timestamp/0, datetime/0, date/0]).
+
+-spec date2ts(date()) -> timestamp().
 date2ts({Y, M, D}) ->
     calendar:datetime_to_gregorian_seconds({{Y, M, D}, {0, 0, 0}})
         - calendar:datetime_to_gregorian_seconds({{1970, 1, 1}, {0,0,0}}).
 
+-spec datetime2ts(datetime()) -> timestamp().
 datetime2ts(Datetime) ->
     calendar:datetime_to_gregorian_seconds(Datetime)
         - calendar:datetime_to_gregorian_seconds({{1970, 1, 1}, {0,0,0}}).
 
+-spec ts2date(timestamp()) -> date().
 ts2date(Timestamp) ->
     {Date, _Time} = ts2datetime(Timestamp),
     Date.
 
+-spec ts2datetime(timestamp()) -> datetime().
 ts2datetime(Timestamp) ->
     BaseDate = calendar:datetime_to_gregorian_seconds({{1970,1,1},{0,0,0}}),
     Seconds = BaseDate + Timestamp,
@@ -49,6 +60,7 @@ now2ms() ->
 now2ms({MegaSecs,Secs,MicroSecs}) ->
     (MegaSecs * 1000000 + Secs) * 1000000 + (MicroSecs div 1000).
 
+-spec now2ts() -> timestamp().
 now2ts() ->
     now2ts(os:timestamp()).
 
