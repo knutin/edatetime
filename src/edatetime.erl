@@ -11,7 +11,7 @@
          range/3,
          map/4, foldl/5,
          shift/3,
-         day_start/1, week_start/1, month_start/1,
+         minute_start/1, hour_start/1, day_start/1, week_start/1, month_start/1,
          second_diff/2, minute_diff/2, hour_diff/2
         ]).
 
@@ -103,11 +103,6 @@ do_foldl(F, Start, End, Period, Acc) ->
 
 
 
-day_start(Ts)    -> Ts - (Ts rem 86400).
-hour_start(Ts)   -> Ts - (Ts rem 3600).
-minute_start(Ts) -> Ts - (Ts rem 60).
-
-
 shift(Ts, N, days)    -> Ts + (N * 86400);
 shift(Ts, N, day)     -> Ts + (N * 86400);
 shift(Ts, N, hours)   -> Ts + (N * 3600);
@@ -116,11 +111,15 @@ shift(Ts, N, minutes) -> Ts + (N * 60);
 shift(Ts, N, minute)  -> Ts + (N * 60);
 shift(Ts, N, seconds) -> Ts + N.
 
-week_start(Ts) when is_integer(Ts) ->
+day_start(Ts)    -> Ts - (Ts rem 86400).
+hour_start(Ts)   -> Ts - (Ts rem 3600).
+minute_start(Ts) -> Ts - (Ts rem 60).
+
+week_start(Ts) ->
     WeekDay = calendar:day_of_the_week(ts2date(Ts)),
     day_start(shift(Ts, -WeekDay+1, days)).
 
-month_start(Ts) when is_integer(Ts) ->
+month_start(Ts) ->
     {Y, M, _} = ts2date(Ts),
     date2ts({Y, M, 1}).
 
