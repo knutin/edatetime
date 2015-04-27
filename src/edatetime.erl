@@ -58,7 +58,7 @@ now2ms() ->
     now2ms(os:timestamp()).
 
 now2ms({MegaSecs,Secs,MicroSecs}) ->
-    (MegaSecs * 1000000 + Secs) * 1000000 + (MicroSecs div 1000).
+    (MegaSecs * 1000000 + Secs) * 1000 + (MicroSecs div 1000).
 
 -spec now2ts() -> timestamp().
 now2ts() ->
